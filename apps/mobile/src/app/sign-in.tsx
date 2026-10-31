@@ -3,7 +3,7 @@ import { useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { signInWithProvider, type OAuthProvider } from "@/lib/oauth";
-import { Aurora } from "@/ui/aurora";
+import { Screen } from "@/ui/aurora";
 import { Glass } from "@/ui/glass";
 import { theme } from "@/ui/theme";
 
@@ -26,8 +26,7 @@ export default function SignIn() {
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <Aurora />
+    <Screen>
       <SafeAreaView style={styles.container}>
         <View>
           <Text style={styles.eyebrow}>LEARNYOU</Text>
@@ -57,7 +56,7 @@ export default function SignIn() {
           )}
         </Glass>
       </SafeAreaView>
-    </View>
+    </Screen>
   );
 }
 

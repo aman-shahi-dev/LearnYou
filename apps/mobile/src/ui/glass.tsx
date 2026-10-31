@@ -2,6 +2,7 @@ import { BlurView } from "expo-blur";
 import { GlassView, isGlassEffectAPIAvailable, isLiquidGlassAvailable } from "expo-glass-effect";
 import type { PropsWithChildren } from "react";
 import { Platform, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
+import { useBlurTarget } from "./aurora";
 import { theme } from "./theme";
 
 const liquidGlass = Platform.OS === "ios" && isLiquidGlassAvailable() && isGlassEffectAPIAvailable();
@@ -20,6 +21,7 @@ type Props = PropsWithChildren<{
  */
 export function Glass({ style, strong, tint, interactive, children }: Props) {
   const radius = theme.radii.xl;
+  const blurTarget = useBlurTarget();
 
   if (liquidGlass) {
     return (
@@ -39,6 +41,7 @@ export function Glass({ style, strong, tint, interactive, children }: Props) {
   return (
     <View style={[{ borderRadius: radius, overflow: "hidden" }, style]}>
       <BlurView
+        blurTarget={blurTarget ?? undefined}
         intensity={strong ? 60 : 40}
         tint="dark"
         blurMethod="dimezisBlurViewSdk31Plus"

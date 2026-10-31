@@ -1,3 +1,4 @@
+import "./crypto-polyfill";
 import { createClient } from "@supabase/supabase-js";
 import { AppState, Platform } from "react-native";
 import { secureStorage } from "./secure-storage";

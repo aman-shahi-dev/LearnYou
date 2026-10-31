@@ -1,7 +1,7 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSession } from "@/lib/session";
-import { Aurora } from "@/ui/aurora";
+import { Screen } from "@/ui/aurora";
 import { Glass } from "@/ui/glass";
 import { theme } from "@/ui/theme";
 
@@ -18,8 +18,7 @@ export default function Home() {
   const first = (meta.full_name ?? meta.name ?? meta.user_name ?? "Learner").split(" ")[0];
 
   return (
-    <View style={{ flex: 1 }}>
-      <Aurora />
+    <Screen>
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
         <ScrollView contentContainerStyle={styles.content}>
           <Text style={styles.eyebrow}>YOUR LIBRARY</Text>
@@ -44,7 +43,7 @@ export default function Home() {
           </Pressable>
         </ScrollView>
       </SafeAreaView>
-    </View>
+    </Screen>
   );
 }
 

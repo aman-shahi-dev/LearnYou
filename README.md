@@ -26,16 +26,20 @@ supabase/migrations Postgres schema + row-level security
    - Paste into Supabase → Authentication → Providers → Google.
 4. **Redirect URLs**: in Supabase → Authentication → URL Configuration, add:
    - `http://localhost:3000/auth/callback` (web dev) and your deployed web URL + `/auth/callback`
-   - `learnyou://auth/callback` (mobile) and, for Expo Go, the `exp://…/--/auth/callback` URL it prints
+   - `learnyou://auth/callback` (mobile builds) and `exp://**` (Expo Go)
 
 ## Develop
 
 ```bash
 pnpm install
 pnpm --filter @learnyou/web dev      # http://localhost:3000
-pnpm --filter @learnyou/mobile dev   # Expo; press i / a, or scan with Expo Go
+cd apps/mobile && npx expo start --tunnel ngrok   # scan the QR with Expo Go
 pnpm typecheck && pnpm exec vitest run packages
 ```
+
+> **Why `--tunnel`?** Supabase rejects OAuth redirect URLs whose host is an IP address
+> (e.g. `exp://192.168.1.15:8081`), even when allow-listed. The tunnel gives Metro a hostname
+> (`xxxx.exp.direct`) that matches `exp://**`. Installed builds use `learnyou://` and don't need it.
 
 ## Free-tier notes
 

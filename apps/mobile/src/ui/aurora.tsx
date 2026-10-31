@@ -1,6 +1,6 @@
-import { BlurView } from "expo-blur";
+import { BlurTargetView, BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
-import { useEffect } from "react";
+import { createContext, use, useEffect, useRef, type ComponentRef, type PropsWithChildren, type RefObject } from "react";
 import { StyleSheet, View, useWindowDimensions } from "react-native";
 import Animated, {
   Easing,
@@ -12,21 +12,45 @@ import Animated, {
 } from "react-native-reanimated";
 import { theme } from "./theme";
 
-/** Animated aurora background: drifting color orbs under a heavy blur. */
-export function Aurora() {
+/**
+ * Android's blur (SDK 55+) only blurs content inside a BlurTargetView, passed to
+ * each BlurView via `blurTarget`. The aurora is that target; glass surfaces read it from context.
+ */
+type ViewInstance = ComponentRef<typeof View>;
+const BlurTargetContext = createContext<RefObject<ViewInstance | null> | null>(null);
+export const useBlurTarget = () => use(BlurTargetContext);
+
+/** Full-screen canvas: animated aurora behind, content (and glass) on top. */
+export function Screen({ children }: PropsWithChildren) {
+  const targetRef = useRef<ViewInstance | null>(null);
   const { width, height } = useWindowDimensions();
+
   return (
-    <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: theme.canvas }]}>
-      <Orb color={theme.aurora.violet} size={width * 1.1} x={-width * 0.35} y={-height * 0.12} dx={width * 0.3} dy={height * 0.1} duration={14000} />
-      <Orb color={theme.aurora.iris} size={width * 0.95} x={width * 0.35} y={height * 0.25} dx={-width * 0.35} dy={-height * 0.08} duration={17000} />
-      <Orb color={theme.aurora.teal} size={width * 0.8} x={-width * 0.05} y={height * 0.7} dx={width * 0.2} dy={-height * 0.15} duration={20000} />
-      <BlurView intensity={100} tint="dark" style={StyleSheet.absoluteFill} />
-      <LinearGradient
-        colors={["transparent", `${theme.canvas}CC`, theme.canvas]}
-        locations={[0.3, 0.8, 1]}
-        style={StyleSheet.absoluteFill}
-      />
-    </View>
+    <BlurTargetContext value={targetRef}>
+      <View style={{ flex: 1, backgroundColor: theme.canvas }}>
+        <BlurTargetView ref={targetRef} pointerEvents="none" style={StyleSheet.absoluteFill}>
+          <Orb color={theme.aurora.violet} size={width * 1.1} x={-width * 0.35} y={-height * 0.12} dx={width * 0.3} dy={height * 0.1} duration={14000} />
+          <Orb color={theme.aurora.iris} size={width * 0.95} x={width * 0.35} y={height * 0.25} dx={-width * 0.35} dy={-height * 0.08} duration={17000} />
+          <Orb color={theme.aurora.teal} size={width * 0.8} x={-width * 0.05} y={height * 0.7} dx={width * 0.2} dy={-height * 0.15} duration={20000} />
+        </BlurTargetView>
+        {/* Softens the orbs into an aurora */}
+        <BlurView
+          pointerEvents="none"
+          blurTarget={targetRef}
+          intensity={100}
+          tint="dark"
+          blurMethod="dimezisBlurViewSdk31Plus"
+          style={StyleSheet.absoluteFill}
+        />
+        <LinearGradient
+          pointerEvents="none"
+          colors={["transparent", `${theme.canvas}CC`, theme.canvas]}
+          locations={[0.3, 0.8, 1]}
+          style={StyleSheet.absoluteFill}
+        />
+        {children}
+      </View>
+    </BlurTargetContext>
   );
 }
 

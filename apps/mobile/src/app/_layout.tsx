@@ -39,6 +39,8 @@ function RootNavigator({ fontsLoaded }: { fontsLoaded: boolean }) {
       <Stack.Protected guard={!session}>
         <Stack.Screen name="sign-in" />
       </Stack.Protected>
+      {/* OAuth deep-link landing: reachable signed in or out */}
+      <Stack.Screen name="auth/callback" />
     </Stack>
   );
 }

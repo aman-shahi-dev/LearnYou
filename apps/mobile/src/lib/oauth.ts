@@ -1,3 +1,5 @@
+import { isRunningInExpoGo } from "expo";
+import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 import { supabase } from "./supabase";
@@ -7,12 +9,32 @@ WebBrowser.maybeCompleteAuthSession();
 export type OAuthProvider = "github" | "google";
 
 /**
- * PKCE OAuth: open the provider in a system auth session, receive
- * learnyou://auth/callback?code=…, then exchange the code for a session.
- * Add this redirect URL in Supabase → Auth → URL Configuration.
+ * Where the provider sends the user back to.
+ * - Expo Go: Android/iOS only route the `exp://` scheme to Expo Go, so use
+ *   exp://<metro-host>/--/auth/callback (allowed by the `exp://**` Supabase redirect entry).
+ *   Supabase rejects redirect URLs whose host is an IP address, so Expo Go must run with
+ *   `npx expo start --tunnel ngrok` (hostname like xxxx.exp.direct), not the LAN IP.
+ * - Dev/production builds: the app's own scheme, learnyou://auth/callback.
  */
+async function getRedirectUrl(): Promise<string> {
+  if (!isRunningInExpoGo()) return Linking.createURL("auth/callback");
+
+  const initialUrl = await Linking.getInitialURL();
+  const candidates = [
+    Constants.expoConfig?.hostUri,
+    Constants.linkingUri?.startsWith("exp") ? Constants.linkingUri : undefined,
+    initialUrl?.startsWith("exp") ? initialUrl : undefined,
+  ];
+  for (const c of candidates) {
+    // Normalize "exp://host:port/--/x" or "host:port" to "host:port"
+    const host = c?.replace(/^exps?:\/\//, "").replace(/\/--.*$/, "").replace(/\/$/, "");
+    if (host) return `exp://${host}/--/auth/callback`;
+  }
+  return Linking.createURL("auth/callback");
+}
+
 export async function signInWithProvider(provider: OAuthProvider): Promise<{ error?: string }> {
-  const redirectTo = Linking.createURL("auth/callback");
+  const redirectTo = await getRedirectUrl();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: { redirectTo, skipBrowserRedirect: true },
