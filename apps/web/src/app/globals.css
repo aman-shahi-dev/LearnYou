@@ -1,0 +1,142 @@
+@import "tailwindcss";
+
+/*
+ * LearnYou — "Liquid Glass Minimal".
+ * Values mirror packages/ui-tokens/src/index.ts (single source of truth).
+ */
+
+@custom-variant light (&:where([data-theme="light"], [data-theme="light"] *));
+
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui;
+  --font-mono: var(--font-geist-mono), ui-monospace;
+  --font-display: var(--font-instrument-serif), ui-serif, Georgia;
+
+  --color-ink-950: #07070b;
+  --color-ink-900: #0c0c14;
+  --color-ink-800: #14141f;
+  --color-ink-700: #1e1e2d;
+  --color-ink-500: #5b5b76;
+  --color-ink-300: #a5a5be;
+  --color-ink-100: #e8e8f2;
+  --color-ink-50: #f6f6fb;
+
+  --color-violet: #7c5cff;
+  --color-iris: #5b8cff;
+  --color-teal: #2de2c4;
+  --color-rose: #ff6fae;
+  --color-amber: #ffb547;
+  --color-success: #3ddc97;
+  --color-danger: #ff5c7a;
+
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+
+  --ease-glass: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-drift-a: drift-a 28s ease-in-out infinite alternate;
+  --animate-drift-b: drift-b 34s ease-in-out infinite alternate;
+  --animate-drift-c: drift-c 40s ease-in-out infinite alternate;
+
+  @keyframes drift-a {
+    to { transform: translate3d(18vw, 12vh, 0) scale(1.25); }
+  }
+  @keyframes drift-b {
+    to { transform: translate3d(-22vw, -8vh, 0) scale(0.85); }
+  }
+  @keyframes drift-c {
+    to { transform: translate3d(10vw, -18vh, 0) scale(1.15); }
+  }
+}
+
+/* ---------- Theme surfaces (dark default, light = "milk glass") ---------- */
+:root {
+  color-scheme: dark;
+  --canvas: var(--color-ink-950);
+  --fg: var(--color-ink-100);
+  --fg-muted: var(--color-ink-300);
+  --glass-fill: rgba(255, 255, 255, 0.06);
+  --glass-fill-strong: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-highlight: rgba(255, 255, 255, 0.18);
+  --glass-shadow: 0 1px 0 0 var(--glass-highlight) inset, 0 20px 60px -20px rgba(0, 0, 0, 0.6);
+  --aurora-opacity: 0.55;
+}
+[data-theme="light"] {
+  color-scheme: light;
+  --canvas: var(--color-ink-50);
+  --fg: var(--color-ink-900);
+  --fg-muted: var(--color-ink-500);
+  --glass-fill: rgba(255, 255, 255, 0.6);
+  --glass-fill-strong: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(12, 12, 20, 0.08);
+  --glass-highlight: rgba(255, 255, 255, 0.9);
+  --glass-shadow: 0 1px 0 0 var(--glass-highlight) inset, 0 20px 50px -24px rgba(40, 30, 90, 0.25);
+  --aurora-opacity: 0.35;
+}
+
+/* Canvas color lives on <html> only: a body background would paint over the -z aurora layer. */
+html {
+  background: var(--canvas);
+  color: var(--fg);
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-violet) 45%, transparent);
+}
+
+/* ---------- Glass utilities ---------- */
+@utility glass {
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+}
+@utility glass-strong {
+  background: var(--glass-fill-strong);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+}
+@utility text-muted {
+  color: var(--fg-muted);
+}
+/* Grain overlay so large blurred areas don't look flat/banded. */
+@utility grain {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* Fallback when backdrop-filter is unsupported. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass,
+  .glass-strong {
+    background: color-mix(in oklab, var(--canvas) 88%, white);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-violet);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
